@@ -1,0 +1,2 @@
+# parallelHW
+homework for parallel
