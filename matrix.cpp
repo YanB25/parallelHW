@@ -34,20 +34,26 @@ void multiple(int size, int testcase) {
         }
     }
     #endif
-    printf("%d, 0, %d, %lf\n", testcase, size, omp_get_wtime() - start);
+    printf("%d, 0, %d, %lf, 1\n", testcase, size, omp_get_wtime() - start);
     fflush(stdout);
 }
-void omp_multiple(int size, int testcase) {
+void omp_multiple(int size, int testcase, int tn) {
     double start = omp_get_wtime();
     #if defined(cacheOptimize)
-    #pragma omp parallel for collapse(3)
-    for (int i = 0; i < size; ++i) {
-        for (int k = 0; k < size; ++k) {
-            for (int j = 0; j < size; ++j) {
-                R[i][j] += A[i][k] * B[k][j];
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    omp_set_num_threads(tn);
+    #pragma omp parallel 
+    {
+        #pragma omp for collapse(1)
+        for (int i = 0; i < size; ++i) {
+            for (int k = 0; k < size; ++k) {
+                for (int j = 0; j < size; ++j) {
+                    R[i][j] += A[i][k] * B[k][j];
+                }
             }
         }
-    }
+
+    } 
     #elif defined(NoneCacheOptimize)
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
@@ -57,7 +63,7 @@ void omp_multiple(int size, int testcase) {
         }
     }
     #endif
-    printf("%d, 1, %d, %lf\n", testcase, size, omp_get_wtime() - start);
+    printf("%d, 1, %d, %lf, %d\n", testcase, size, omp_get_wtime() - start, tn);
     fflush(stdout);
 }
 void cache_flash() {
@@ -70,15 +76,21 @@ void cache_flash() {
     }
 }
 int main() {
-    printf("testcase, useOMP(1/0), size, time\n");
+    printf("testcase, useOMP(1/0), size, time, treadsnum\n");
     fflush(stdout);
     init();
-    for (int i = 0; i < 10; ++i) {
-        for (int size = 100; size <= 1000; size +=50) {
+    // for (int i = 0; i < 20; ++i) {
+    //     init();
+    //     multiple(50, i);
+    //     init();
+    //     omp_multiple(50, i);
+    // }
+    for (int t = 0; t <= 10; ++t) {
+        for (int i = 1; i <= 8; i++) {
             init();
-            multiple(size, i);
+            omp_multiple(200, t, i);
             init();
-            omp_multiple(size, i);
+            multiple(200, t);
         }
     }
 }
