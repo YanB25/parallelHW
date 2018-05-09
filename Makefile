@@ -8,10 +8,10 @@ dummy.out : schedule.cpp
 
 
 run_c:
-	./cacheLineOptimize.out 2>&1 | tee log_cache
+	./cacheLineOptimize.out 2>&1 | tee log/log_cache
 run_nc:
-	./NoneCacheLineOptimize.out 2>&1 | tee log_noneCache
+	./NoneCacheLineOptimize.out 2>&1 | tee log/log_noneCache
 run_dummy:
-	./dummy.out
+	./dummy.out 2>&1 | tee log/log_dummy
 clean:
 	find . -name "*.out" -delete
