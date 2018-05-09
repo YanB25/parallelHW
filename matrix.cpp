@@ -44,11 +44,11 @@ void omp_multiple1(int size, int testcase, int tn) {
     double start = omp_get_wtime();
     for(int lp=0; lp<LOOPTIME; ++lp){
     #if defined(cacheOptimize)
-    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    //omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
-    #pragma omp parallel 
+    #pragma omp parallel
     {
-        #pragma omp for collapse(1)
+        #pragma omp for collapse(1) schedule(dynamic)
         for (int i = 0; i < size; ++i) {
             for (int k = 0; k < size; ++k) {
                 for (int j = 0; j < size; ++j) {
@@ -75,11 +75,11 @@ void omp_multiple2(int size, int testcase, int tn) {
     double start = omp_get_wtime();
     for (int lp=0; lp<LOOPTIME; ++lp){
     #if defined(cacheOptimize)
-    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    //omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
-    #pragma omp parallel 
+    #pragma omp parallel
     {
-        #pragma omp for collapse(2)
+        #pragma omp for collapse(2) schedule(dynamic)
         for (int i = 0; i < size; ++i) {
             for (int k = 0; k < size; ++k) {
                 for (int j = 0; j < size; ++j) {
@@ -106,11 +106,11 @@ void omp_multiple3(int size, int testcase, int tn) {
     double start = omp_get_wtime();
     for (int lp = 0; lp < LOOPTIME; ++lp) {
     #if defined(cacheOptimize)
-    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    // omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
-    #pragma omp parallel 
+    #pragma omp parallel
     {
-        #pragma omp for collapse(3)
+        #pragma omp for collapse(3) schedule(dynamic)
         for (int i = 0; i < size; ++i) {
             for (int k = 0; k < size; ++k) {
                 for (int j = 0; j < size; ++j) {
