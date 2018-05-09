@@ -1,17 +1,19 @@
-all: cacheLineOptimize.out NoneCacheLineOptimize.out dummy.out
-cacheLineOptimize.out: matrix.cpp
+all: build/cacheLineOptimize.out build/NoneCacheLineOptimize.out build/dummy.out
+build/cacheLineOptimize.out: matrix.cpp
 	g++ $^ -o $@ -std=c++11 -fopenmp -D cacheOptimize
-NoneCacheLineOptimize.out: matrix.cpp
+build/NoneCacheLineOptimize.out: matrix.cpp
 	g++ $^ -o $@ -std=c++11 -fopenmp -D NoneCacheOptimize
-dummy.out : schedule.cpp
+build/dummy.out : schedule.cpp
 	g++ $^ -o $@ -std=c++11 -fopenmp
 
 
 run_c:
-	./cacheLineOptimize.out 2>&1 | tee log/log_cache
+	./build/cacheLineOptimize.out 2>&1 | tee log/cache.log
 run_nc:
-	./NoneCacheLineOptimize.out 2>&1 | tee log/log_noneCache
+	./build/NoneCacheLineOptimize.out 2>&1 | tee log/noneCache.log
 run_dummy:
-	./dummy.out 2>&1 | tee log/log_dummy
+	./build/dummy.out 2>&1 | tee log/dummy.log
 clean:
 	find . -name "*.out" -delete
+clean_LOG:
+	find . -name ".log" -delete
