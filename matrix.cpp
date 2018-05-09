@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 const int  SIZE = 2000;
+#define LOOPTIME 2000
 double A[SIZE][SIZE]; 
 double B[SIZE][SIZE];
 double R[SIZE][SIZE];
@@ -17,6 +18,7 @@ void init() {
 
 void multiple(int size, int testcase) {
     double start = omp_get_wtime();
+    for(int lp=0; lp < LOOPTIME; ++lp) {
     #if defined(cacheOptimize)
     for (int i = 0; i < size; ++i) {
         for (int k = 0; k < size; ++k) {
@@ -34,11 +36,13 @@ void multiple(int size, int testcase) {
         }
     }
     #endif
-    printf("%d, 0, %lf, 1, 0\n", testcase, omp_get_wtime() - start);
+    }
+    printf("%d, 0, %lf, 1, 0\n", testcase, (omp_get_wtime() - start)/LOOPTIME);
     fflush(stdout);
 }
 void omp_multiple1(int size, int testcase, int tn) {
     double start = omp_get_wtime();
+    for(int lp=0; lp<LOOPTIME; ++lp){
     #if defined(cacheOptimize)
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
@@ -63,11 +67,13 @@ void omp_multiple1(int size, int testcase, int tn) {
         }
     }
     #endif
-    printf("%d, 1, %lf, %d, 1\n", testcase, omp_get_wtime() - start, tn);
+    }
+    printf("%d, 1, %lf, %d, 1\n", testcase, (omp_get_wtime() - start)/LOOPTIME, tn);
     fflush(stdout);
 }
 void omp_multiple2(int size, int testcase, int tn) {
     double start = omp_get_wtime();
+    for (int lp=0; lp<LOOPTIME; ++lp){
     #if defined(cacheOptimize)
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
@@ -92,11 +98,13 @@ void omp_multiple2(int size, int testcase, int tn) {
         }
     }
     #endif
-    printf("%d, 1, %lf, %d, 2\n", testcase, omp_get_wtime() - start, tn);
+    }
+    printf("%d, 1, %lf, %d, 2\n", testcase, (omp_get_wtime() - start)/LOOPTIME, tn);
     fflush(stdout);
 }
 void omp_multiple3(int size, int testcase, int tn) {
     double start = omp_get_wtime();
+    for (int lp = 0; lp < LOOPTIME; ++lp) {
     #if defined(cacheOptimize)
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(tn);
@@ -121,7 +129,8 @@ void omp_multiple3(int size, int testcase, int tn) {
         }
     }
     #endif
-    printf("%d, 1, %lf, %d, %d\n", testcase, omp_get_wtime() - start, tn, 3);
+    }
+    printf("%d, 1, %lf, %d, %d\n", testcase, (omp_get_wtime() - start)/LOOPTIME, tn, 3);
     fflush(stdout);
 }
 void cache_flash() {
@@ -143,14 +152,12 @@ int main() {
     //     init();
     //     omp_multiple(50, i);
     // }
-    for (int t = 0; t <= 50; ++t) {
+    init();
+    multiple(50, 0);
+    for (int i = 1; i <= 128; i++) {
         init();
-        multiple(50, t);
-        for (int i = 1; i <= 128; i++) {
-            init();
-            omp_multiple1(50, t, i);
-            omp_multiple2(50, t, i);
-            omp_multiple3(50, t, i);
-        }
+        omp_multiple1(50, 0, i);
+        omp_multiple2(50, 0, i);
+        omp_multiple3(50, 0, i);
     }
 }
