@@ -8,7 +8,7 @@ $ make
 $ make run_dummy
 ```
 ### 程序介绍
-在程序`dummy.out`中，定义了一个函数
+在程序`buid/dummy.out`中，定义了一个函数
 ```C
 void dummy(double sec);
 ```

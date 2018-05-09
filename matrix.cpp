@@ -34,10 +34,10 @@ void multiple(int size, int testcase) {
         }
     }
     #endif
-    printf("%d, 0, %d, %lf, 1\n", testcase, size, omp_get_wtime() - start);
+    printf("%d, 0, %lf, 1, 0\n", testcase, omp_get_wtime() - start);
     fflush(stdout);
 }
-void omp_multiple(int size, int testcase, int tn) {
+void omp_multiple1(int size, int testcase, int tn) {
     double start = omp_get_wtime();
     #if defined(cacheOptimize)
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -63,7 +63,65 @@ void omp_multiple(int size, int testcase, int tn) {
         }
     }
     #endif
-    printf("%d, 1, %d, %lf, %d\n", testcase, size, omp_get_wtime() - start, tn);
+    printf("%d, 1, %lf, %d, 1\n", testcase, omp_get_wtime() - start, tn);
+    fflush(stdout);
+}
+void omp_multiple2(int size, int testcase, int tn) {
+    double start = omp_get_wtime();
+    #if defined(cacheOptimize)
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    omp_set_num_threads(tn);
+    #pragma omp parallel 
+    {
+        #pragma omp for collapse(2)
+        for (int i = 0; i < size; ++i) {
+            for (int k = 0; k < size; ++k) {
+                for (int j = 0; j < size; ++j) {
+                    R[i][j] += A[i][k] * B[k][j];
+                }
+            }
+        }
+
+    } 
+    #elif defined(NoneCacheOptimize)
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            for (int k = 0; k < size; ++k) {
+                R[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    #endif
+    printf("%d, 1, %lf, %d, 2\n", testcase, omp_get_wtime() - start, tn);
+    fflush(stdout);
+}
+void omp_multiple3(int size, int testcase, int tn) {
+    double start = omp_get_wtime();
+    #if defined(cacheOptimize)
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    omp_set_num_threads(tn);
+    #pragma omp parallel 
+    {
+        #pragma omp for collapse(3)
+        for (int i = 0; i < size; ++i) {
+            for (int k = 0; k < size; ++k) {
+                for (int j = 0; j < size; ++j) {
+                    R[i][j] += A[i][k] * B[k][j];
+                }
+            }
+        }
+
+    } 
+    #elif defined(NoneCacheOptimize)
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            for (int k = 0; k < size; ++k) {
+                R[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    #endif
+    printf("%d, 1, %lf, %d, %d\n", testcase, omp_get_wtime() - start, tn, 3);
     fflush(stdout);
 }
 void cache_flash() {
@@ -76,7 +134,7 @@ void cache_flash() {
     }
 }
 int main() {
-    printf("testcase, useOMP(1/0), size, time, treadsnum\n");
+    printf("testcase, useOMP(1/0), time, threadsnum, collapse\n");
     fflush(stdout);
     init();
     // for (int i = 0; i < 20; ++i) {
@@ -85,12 +143,14 @@ int main() {
     //     init();
     //     omp_multiple(50, i);
     // }
-    for (int t = 0; t <= 10; ++t) {
-        for (int i = 1; i <= 8; i++) {
+    for (int t = 0; t <= 50; ++t) {
+        init();
+        multiple(50, t);
+        for (int i = 1; i <= 128; i++) {
             init();
-            omp_multiple(200, t, i);
-            init();
-            multiple(200, t);
+            omp_multiple1(50, t, i);
+            omp_multiple2(50, t, i);
+            omp_multiple3(50, t, i);
         }
     }
 }
